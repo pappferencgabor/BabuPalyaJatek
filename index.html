@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="content">
+        <div id="control">
+            <label for="sorokSzama">Sorok száma (<span id="sorokSpan">5</span>)</label>
+            <br>
+            <input type="range" id="sorokSzama" min="1" max="10" step="1" value="5" oninput="ModositSpan(this)">
+
+            <br>
+
+            <label for="oszlopokSzama">Oszlopok száma (<span id="oszlopokSpan">5</span>)</label>
+            <br>
+            <input type="range" id="oszlopokSzama" min="1" max="10" step="1" value="5" oninput="ModositSpan(this)">
+
+            <br>
+
+            <button type="button" onclick="PalyaGeneralas()">Pálya létrehozása</button>
+
+            <hr>
+
+            <button id="felveszBtn" type="button" onclick="UjBabu()">Felvesz</button>
+            <button id="inditasBtn" type="button" onclick="Inditas()">Indít</button>
+        </div>
+
+        <div id="playground"></div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,45 @@
+body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(paleturquoise, palegreen);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+#control {
+    text-align: center;
+    margin-bottom: 15px;
+}
+#sorokSpan, #oszlopokSpan {
+    font-weight: bold;
+    color: red;
+}
+
+#playground {
+    display: grid;
+    gap: 5px;
+    background-color: aqua;
+    border: 10px solid aqua;
+}
+
+.field {
+    width: 50px;
+    height: 50px;
+    background-color: palegoldenrod;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.dummy, .bomb, .dead {
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+}
+.dummy { background-color: blue; }
+.bomb { background-color: red; }
+.dead { background-color: grey; }
