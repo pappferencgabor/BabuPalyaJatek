@@ -1,12 +1,7 @@
-let mezok = [];
-let babuk = [];
-let bombak = [];
-let szabad = [];
-
-let mezokid = [];
-let babukid = [];
-let bombakid = [];
-let szabadid = [];
+let listMezok = [];
+let listSzabadok = [];
+let listBabuk = [];
+let listBombak = [];
 
 const ELEMENTS = {
     sorokSzamaRange: document.getElementById("sorokSzama"),
@@ -15,59 +10,79 @@ const ELEMENTS = {
     oszolopokSzamaSpan: document.getElementById("oszlopokSpan"),
     palya: document.getElementById("playground"),
     babuFelveszButton: document.getElementById("felveszBtn"),
-    inditasButton: document.getElementById("inditasBtn")
+    inditasButton: document.getElementById("inditasBtn"),
+    logUl: document.getElementById("log")
 }
 
 function Inditas() {
     UjBomba();
     ELEMENTS.inditasButton.disabled = true;
 
-    setInterval(function(){
-        //console.log(babukid);
-        babukid.forEach(babu => {
-            //console.log(babu);
-            let index = parseInt(babu.split("f")[1]);
-    
-            let lehetseges = [index-5, index+1, index+5, index-1];
-            console.log(lehetseges);
+    let interval = setInterval(function(){
+        let babbukszama = listBabuk.length;
+        if (babbukszama === 0) {
+            clearInterval(interval);
+            return;
+        }
+
+        let ujBabuk = {}; // Ideiglenes tároló az új bábuk pozícióinak
+
+        for (let i = 0; i < babbukszama; i++) {
+            let babu = listBabuk[i];
+            let col = parseInt(document.getElementById(`mezo${babu}`).style.gridColumn);
+            let row = parseInt(document.getElementById(`mezo${babu}`).style.gridRow);
+            let mezo = `${col}-${row}`;
+
+            let lehetseges = [
+                `${col}-${row - 1}`,
+                `${col + 1}-${row}`,
+                `${col}-${row + 1}`,
+                `${col - 1}-${row}`
+            ];
+
             let lepheto = [];
-    
+
             lehetseges.forEach(mezo => {
-                if (mezo > -1 || mezo < ELEMENTS.sorokSzamaRange.value*ELEMENTS.oszolopokSzamaRange.value) {
+                if (listMezok.includes(mezo) && !listBabuk.includes(mezo)) {
                     lepheto.push(mezo);
                 }
             });
-    
-            console.log(lepheto);
-    
+
             if (lepheto.length > 0) {
-                let newindex = lepheto[Math.floor(Math.random() * lepheto.length)];
-                //console.log(newindex);
-    
-                //document.getElementById(newindex).innerHTML = "a"
-                document.getElementById(`f${newindex}`).innerHTML = document.getElementById(`f${index}`).innerHTML;
-                document.getElementById(`f${index}`).innerHTML = "";
+                let newmezo = lepheto[Math.floor(Math.random() * lepheto.length)];
 
-                //szabadid.push(newindex);
-                babukid.splice(babukid.indexOf(`f${index}`), 1);
-                babukid.push(`f${newindex}`)
-                szabadid.push(`f${index}`)
+                if (listBombak.includes(newmezo)) {
+                    // Ha bombára lépett, a bábu eltűnik
+                    ELEMENTS.logUl.innerHTML += `<li></li>`
+                    document.getElementById(`mezo${mezo}`).innerHTML = "";
+                } else {
+                    // Ha üres mezőre lépett, mozgatjuk a bábut
+                    document.getElementById(`mezo${newmezo}`).innerHTML = document.getElementById(`mezo${mezo}`).innerHTML;
+                    document.getElementById(`mezo${mezo}`).innerHTML = "";
+
+                    ujBabuk[babu] = newmezo;
+                }
             }
-            else {
-                document.getElementById(`f${index}`).innerHTML = "";
+        }
 
-                szabadid.push(`f${index}`);
-                babukid.splice(babukid.indexOf(`f${index}`), 1);
-
-                console.log(babuk.indexOf(`f${index}`));
-
-                babuk.splice(babuk.indexOf(`f${index}`), 1);
-                //console.log(babuk);
-            }
-            console.log("============================");
+        // Frissítjük a listBabuk tömböt az új pozíciókkal
+        Object.keys(ujBabuk).forEach(babu => {
+            listBabuk.splice(listBabuk.indexOf(babu), 1);
+            listBabuk.push(ujBabuk[babu]);
         });
-    }, 1000);
+
+        // Ellenőrizzük az utolsó bábú helyzetét
+        if (listBabuk.length === 1 && listBombak.includes(listBabuk[0])) {
+            // Ha az utolsó bábú bombára lép, akkor játék vége
+            clearInterval(interval);
+        }
+    }, 2000);
 }
+
+
+
+
+
 
 function JatekVege() {
 
@@ -81,36 +96,40 @@ function PalyaGeneralas() {
     palya.innerHTML = "";
     mezok = []
 
-    palya.style.gridTemplateColumns = `repeat(${oszolopokszama}, 1fr)`;
     palya.style.gridTemplateRows = `repeat(${sorokszama}, 1fr)`;
+    palya.style.gridTemplateColumns = `repeat(${oszolopokszama}, 1fr)`;
 
-    for (let i = 0; i < sorokszama*oszolopokszama; i++) {
-        let div = document.createElement("div");
-        div.setAttribute("class", "field");
-        div.setAttribute("id", `f${i}`);
-        
-        palya.appendChild(div);
-        mezok.push(div);
-        szabad.push(div);
+    let babuindex = 0;
+    for (let sorIndex = 0; sorIndex < sorokszama; sorIndex++) {
+        for (let oszlopIndex = 0; oszlopIndex < oszolopokszama; oszlopIndex++) {
+            let div = document.createElement("div");
+            div.setAttribute("class", "field");
+            div.setAttribute("id", `mezo${oszlopIndex+1}-${sorIndex+1}`);
 
+            div.style.gridColumn = `${oszlopIndex+1} / span 1`;
+            div.style.gridRow = `${sorIndex+1} / span 1`;
 
-        szabadid.push(`f${i}`);
-        mezokid.push(`f${i}`);
+            console.log(oszlopIndex+1, sorIndex+1);
+
+            listMezok.push(`${oszlopIndex+1}-${sorIndex+1}`);
+            listSzabadok.push(`${oszlopIndex+1}-${sorIndex+1}`);
+            
+            palya.appendChild(div);
+
+            babuindex++;
+        }
     }
 }
 
 function UjBabu() {
-    if ((babuk.length / mezok.length) < 0.5) {
-        let babu = Letrehoz("babu", babuk.length);
-        let mezo = szabad[Math.floor(Math.random() * szabad.length)]
-    
-        babuk.push(mezo.id);
-        szabad.splice(szabad.indexOf(mezo), 1);
+    if ((listBabuk.length / listMezok.length) < 0.5) {
+        let babu = Letrehoz("babu", listBabuk.length);
+        let mezo = listSzabadok[Math.floor(Math.random() * listSzabadok.length)];
 
-        szabadid.splice(szabadid.indexOf(mezo.id), 1);
-        babukid.push(mezo.id);
+        listBabuk.push(mezo);
+        listSzabadok.splice(listSzabadok.indexOf(mezo), 1);
 
-        mezo.innerHTML += babu;
+        document.getElementById(`mezo${mezo}`).innerHTML += babu;
     }
     else {
         ELEMENTS.babuFelveszButton.disabled = true;
@@ -120,18 +139,15 @@ function UjBabu() {
 function UjBomba() {
     let bombakSzama = Math.ceil(ELEMENTS.oszolopokSzamaRange.value * ELEMENTS.sorokSzamaRange.value * 0.1);
     
-    if (bombakSzama <= szabad.length) {
+    if (bombakSzama <= listSzabadok.length) {
         for (let i = 0; i < bombakSzama; i++) {
             let bomba = Letrehoz("bomba", i);
-            let mezo = szabad[Math.floor(Math.random() * szabad.length)]
+            let mezo = listSzabadok[Math.floor(Math.random() * listSzabadok.length)]
         
-            bombak.push(mezo.id);
-            szabad.splice(szabad.indexOf(mezo), 1)
+            listBombak.push(mezo);
+            listSzabadok.splice(listSzabadok.indexOf(mezo), 1)
 
-            szabadid.splice(szabadid.indexOf(mezo.id), 1);
-            bombakid.push(mezo.id);
-
-            mezo.innerHTML += bomba;
+            document.getElementById(`mezo${mezo}`).innerHTML += bomba;
         }
     }
     else {
@@ -146,12 +162,8 @@ function ModositSpan(elem) {
 
 function Letrehoz(mit, hanyadik) {
     if (mit == "babu") {
-        return `<div class="dummy" id="d${hanyadik}"></div>`
+        return `<div class="dummy"></div>`
     } else if (mit == "bomba") {
-        return `<div class="bomb" id="b${hanyadik}"></div>`
+        return `<div class="bomb"></div>`
     }
 }
-
-
-console.log(9%4);
-console.log(14%4);
